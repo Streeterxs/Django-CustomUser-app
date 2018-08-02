@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 
 class AuthUserManager(BaseUserManager):
 
-    def _create_user(self, email, password=None, is_active=True, is_staff=False, is_admin=False):
+    def _create_user(self, email, password=None, isactive=True, isstaff=False, superuser=False):
         if not email:
             raise ValueError(_('Users must have a email.'))
         if not password:
@@ -15,9 +15,9 @@ class AuthUserManager(BaseUserManager):
         usermanageruser = self.model(
             email=self.normalize_email(email)
         )
-        usermanageruser.active = is_active
-        usermanageruser.staff = is_staff
-        usermanageruser.admin = is_admin
+        usermanageruser.is_active = isactive
+        usermanageruser.is_staff = isstaff
+        usermanageruser.is_superuser = superuser
         usermanageruser.set_password(password)
         usermanageruser.save(using=self._db)
         return usermanageruser
@@ -26,7 +26,7 @@ class AuthUserManager(BaseUserManager):
         user = self._create_user(
             email,
             password=password,
-            is_staff=True
+            isstaff=True
         )
         return user
 
@@ -34,8 +34,8 @@ class AuthUserManager(BaseUserManager):
         user = self._create_user(
             email,
             password=password,
-            is_staff=True,
-            is_admin=True
+            isstaff=True,
+            superuser=True
         )
         return user
 
@@ -43,11 +43,10 @@ class AuthUserManager(BaseUserManager):
 class AuthUser (AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_('Email'), max_length=100, unique=True)
     date_joined = models.DateTimeField(_('date joined'), auto_now_add=True)
-    active = models.BooleanField(_('Active'), default=False)
-    staff = models.BooleanField(_('Staff'), default=False)
-    admin = models.BooleanField(_('Admin'), default=False)
+    is_active = models.BooleanField(_('Active'), default=True)
+    is_staff = models.BooleanField(_('Staff'), default=False)
 
-    object = AuthUserManager
+    objects = AuthUserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -60,15 +59,3 @@ class AuthUser (AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.email
-
-    @property
-    def is_staff(self):
-        return self.staff
-
-    @property
-    def is_admin(self):
-        return self.admin
-
-    @property
-    def is_active(self):
-        return self.active
