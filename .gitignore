@@ -1,0 +1,10 @@
+.DS_STORE
+.env
+.idea
+.py1
+*.sqlite3
+*pyc
+__pycache__
+core
+stackoverflowchurchsec
+manage.py
